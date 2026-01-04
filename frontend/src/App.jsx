@@ -1,21 +1,47 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
-import CoursesPage from './pages/CoursesPage';
-import CourseDetailPage from './pages/CourseDetailPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import DashboardPage from './pages/DashboardPage';
+
+// Pages
+import Home from './pages/Home';
+import Courses from './pages/Courses';
+import CourseDetail from './pages/CourseDetail';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import AdminPanel from './pages/AdminPanel';
+
+// Components
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/courses" element={<CoursesPage />} />
-        <Route path="/courses/:id" element={<CourseDetailPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/courses/:slug" element={<CourseDetail />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* Protected User Route */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Protected Admin Route */}
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminPanel />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </Router>
   );
