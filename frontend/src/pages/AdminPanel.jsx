@@ -6,25 +6,17 @@ export default function AdminPanel() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    price: 0,
-    category: '',
-    difficulty: 'Beginner',
-    thumbnailUrl: '',
+    title: '', slug: '', description: '', price: 0, category: '', difficulty: 'Beginner'
   });
 
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user'));
   const navigate = useNavigate();
 
-  // Redirect if not admin
   useEffect(() => {
     if (!user || user.role !== 'admin') navigate('/');
   }, [user, navigate]);
 
-  // Fetch all courses
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -39,58 +31,36 @@ export default function AdminPanel() {
     fetchCourses();
   }, []);
 
-  // Handle input change
-  const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const handleChange = (e) => setFormData({...formData, [e.target.name]: e.target.value});
 
-  // Handle course create
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post('/courses', formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await API.post('/courses', formData, { headers: { Authorization: `Bearer ${token}` } });
       setCourses(prev => [...prev, res.data]);
-      setFormData({
-        title: '',
-        slug: '',
-        description: '',
-        price: 0,
-        category: '',
-        difficulty: 'Beginner',
-        thumbnailUrl: '',
-      });
-      alert('Course created successfully!');
+      setFormData({ title: '', slug: '', description: '', price: 0, category: '', difficulty: 'Beginner' });
+      alert('Course created!');
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to create course');
     }
   };
 
-  // Handle delete course
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this course?')) return;
+    if (!window.confirm('Delete this course?')) return;
     try {
-      await API.delete(`/courses/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await API.delete(`/courses/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       setCourses(prev => prev.filter(c => c._id !== id));
-      alert('Course deleted successfully!');
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to delete course');
     }
   };
 
-  if (loading) return <p>Loading courses...</p>;
+  if (loading) return <p className="container">Loading courses...</p>;
 
   return (
     <div className="container">
-      <h2>Admin Panel</h2>
-
-      <h3>Create New Course</h3>
-      <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
+      <h2 style={{ marginBottom: '2rem' }}>Admin Panel</h2>
+      <form onSubmit={handleCreate} style={{ marginBottom: '2rem' }}>
         <input type="text" name="title" placeholder="Title" value={formData.title} onChange={handleChange} required />
         <input type="text" name="slug" placeholder="Slug" value={formData.slug} onChange={handleChange} required />
         <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} required />
@@ -101,22 +71,20 @@ export default function AdminPanel() {
           <option value="Intermediate">Intermediate</option>
           <option value="Advanced">Advanced</option>
         </select>
-        <input type="text" name="thumbnailUrl" placeholder="Thumbnail URL" value={formData.thumbnailUrl} onChange={handleChange} />
-        <button type="submit">Create Course</button>
+        <button className="primary" type="submit">Create Course</button>
       </form>
 
-      <h3>Existing Courses</h3>
-      <ul>
+      <div className="course-list">
         {courses.map(course => (
-          <li key={course._id} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem', borderRadius: '5px' }}>
-            <h4>{course.title}</h4>
+          <div key={course._id} className="course-card">
+            <h3>{course.title}</h3>
             <p>{course.description}</p>
             <p>Category: {course.category} | Difficulty: {course.difficulty}</p>
             <p>Price: ${course.price}</p>
-            <button onClick={() => handleDelete(course._id)} style={{ backgroundColor: 'red', color: 'white', padding: '0.3rem 0.6rem', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>Delete</button>
-          </li>
+            <button style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleDelete(course._id)}>Delete</button>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

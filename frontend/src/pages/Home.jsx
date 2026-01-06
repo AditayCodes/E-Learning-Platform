@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import API from '../api/api';
 
 export default function Home() {
   const [user, setUser] = useState(null);
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
-  // Check if user is logged in
   useEffect(() => {
     if (token) {
       const storedUser = localStorage.getItem('user');
@@ -16,45 +14,17 @@ export default function Home() {
     }
   }, [token]);
 
-  // Fetch featured courses
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const res = await API.get('/courses');
-        // Optional: show only first 3 courses as featured
-        setCourses(res.data.slice(0, 3));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCourses();
-  }, []);
-
   return (
-    <div className="container">
-      <h1>Welcome to the E-Learning Platform</h1>
-
-      {/* Show logged-in user */}
-      {user ? <p>Hello, <strong>{user.name}</strong>!</p> : <p>Please <Link to="/login">Login</Link> or <Link to="/signup">Signup</Link></p>}
-
-      <h2>Featured Courses</h2>
-      {loading ? (
-        <p>Loading courses...</p>
-      ) : courses.length === 0 ? (
-        <p>No courses available yet.</p>
+    <div className="hero">
+      <h1>Learn Anything, Anytime</h1>
+      <p>
+        Join thousands of learners and access professional courses online.
+        Track your progress, enroll in courses, and start learning today!
+      </p>
+      {user ? (
+        <button onClick={() => navigate('/dashboard')}>Go to Dashboard</button>
       ) : (
-        <ul>
-          {courses.map(course => (
-            <li key={course._id} style={{ marginBottom: '1rem', border: '1px solid #ccc', padding: '0.5rem', borderRadius: '5px' }}>
-              <h3>{course.title}</h3>
-              <p>{course.description}</p>
-              <p>Category: {course.category} | Difficulty: {course.difficulty}</p>
-              <Link to={`/courses/${course.slug}`}>View Course</Link>
-            </li>
-          ))}
-        </ul>
+        <button onClick={() => navigate('/signup')}>Start Learning</button>
       )}
     </div>
   );
