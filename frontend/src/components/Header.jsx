@@ -11,83 +11,24 @@ export default function Header() {
   };
 
   return (
-    <header
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '1rem 2rem',
-        backgroundColor: '#f8f9fa',
-        borderBottom: '1px solid #ddd',
-      }}
-    >
-      {/* Left side: App name */}
-      <h2 style={{ margin: 0 }}>
-        <Link to="/" style={{ textDecoration: 'none', color: '#333' }}>
-          E-Learning Platform
-        </Link>
-      </h2>
-
-      {/* Right side: Navigation links */}
-      <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <Link to="/" style={{ textDecoration: 'none', color: '#007bff' }}>
-          Home
-        </Link>
-        <Link to="/courses" style={{ textDecoration: 'none', color: '#007bff' }}>
-          Courses
-        </Link>
-
-        {user && (
-          <Link
-            to="/dashboard"
-            style={{ textDecoration: 'none', color: '#007bff' }}
-          >
-            Dashboard
-          </Link>
-        )}
-
-        {user?.role === 'admin' && (
-          <Link
-            to="/admin"
-            style={{ textDecoration: 'none', color: '#007bff' }}
-          >
-            Admin Panel
-          </Link>
-        )}
-
-        {!user && (
-          <>
-            <Link
-              to="/login"
-              style={{ textDecoration: 'none', color: '#007bff' }}
-            >
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              style={{ textDecoration: 'none', color: '#007bff' }}
-            >
-              Signup
-            </Link>
-          </>
-        )}
-
-        {user && (
-          <button
-            onClick={handleLogout}
-            style={{
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Logout
-          </button>
-        )}
-      </nav>
-    </header>
+    <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+      <div className="container">
+        <Link className="navbar-brand fw-bold" to="/">E-Learning</Link>
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto">
+            <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
+            <li className="nav-item"><Link className="nav-link" to="/courses">Courses</Link></li>
+            {user && <li className="nav-item"><Link className="nav-link" to="/dashboard">Dashboard</Link></li>}
+            {user?.role === 'admin' && <li className="nav-item"><Link className="nav-link" to="/admin">Admin</Link></li>}
+            {!user && <li className="nav-item"><Link className="nav-link" to="/login">Login</Link></li>}
+            {!user && <li className="nav-item"><Link className="nav-link" to="/signup">Signup</Link></li>}
+            {user && <li className="nav-item"><button className="btn btn-danger ms-2" onClick={handleLogout}>Logout</button></li>}
+          </ul>
+        </div>
+      </div>
+    </nav>
   );
 }
