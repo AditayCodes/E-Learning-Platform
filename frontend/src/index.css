@@ -1,0 +1,18 @@
+/* index.css */
+
+/* Import Bootstrap globally */
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+/* Optional: you can add small tweaks here if ever needed */
+body {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background-color: #f8f9fa; /* Bootstrap light gray background */
+  color: #212529; /* Standard text color */
+  margin: 0;
+  padding: 0;
+}
+
+/* Smooth transitions globally */
+button, .btn, .card {
+  transition: all 0.2s ease-in-out;
+}

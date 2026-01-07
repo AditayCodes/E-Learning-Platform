@@ -27,12 +27,8 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
 
         {/* Protected Pages */}
-        <Route path="/dashboard" element={
-          <PrivateRoute><Dashboard /></PrivateRoute>
-        } />
-        <Route path="/admin" element={
-          <PrivateRoute><AdminPanel /></PrivateRoute>
-        } />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/admin" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
       </Routes>
       <Footer />
     </Router>

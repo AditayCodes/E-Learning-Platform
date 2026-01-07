@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import API from '../api/api';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import API from "../api/api";
 
 export default function CourseDetail() {
   const { slug } = useParams();
@@ -9,18 +9,18 @@ export default function CourseDetail() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  // Fetch course by slug
+  // ✅ Fetch course by slug
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const res = await API.get('/courses');
+        const res = await API.get("/courses");
         const selected = res.data.find((c) => c.slug === slug);
-        setCourse(selected);
+        setCourse(selected || null);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching course:", err);
       } finally {
         setLoading(false);
       }
@@ -28,128 +28,128 @@ export default function CourseDetail() {
     fetchCourse();
   }, [slug]);
 
-  // Fetch user enrollments (if logged in)
+  // ✅ Fetch user enrollments (if logged in)
   useEffect(() => {
     const fetchEnrollments = async () => {
       if (!token) return;
       try {
-        const res = await API.get('/enrollments/me', {
+        const res = await API.get("/enrollments/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setEnrollments(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching enrollments:", err);
       }
     };
     fetchEnrollments();
   }, [token]);
 
-  // Check if user is already enrolled
+  // ✅ Check if already enrolled
   const isEnrolled = () => {
     if (!user || !course) return false;
     return enrollments.some((enroll) => enroll.courseId._id === course._id);
   };
 
-  // Enroll user
+  // ✅ Enroll user
   const handleEnroll = async () => {
-    if (!token) return navigate('/login');
+    if (!token) return navigate("/login");
     try {
       await API.post(
-        '/enrollments',
+        "/enrollments",
         { courseId: course._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Enrolled successfully!');
-      navigate('/dashboard');
+      alert("Enrolled successfully!");
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Enrollment failed');
+      alert(err.response?.data?.message || "Enrollment failed");
     }
   };
 
-  if (loading) return <p>Loading course...</p>;
-  if (!course) return <p>Course not found</p>;
+  // 🌀 Loading state
+  if (loading)
+    return (
+      <div className="container text-center py-5">
+        <div className="spinner-border text-primary" role="status"></div>
+        <p className="mt-3 text-muted">Loading course...</p>
+      </div>
+    );
 
+  // ❌ Course not found
+  if (!course)
+    return (
+      <div className="container py-5 text-center">
+        <h4 className="text-danger">Course not found</h4>
+        <p className="text-muted">The requested course does not exist.</p>
+      </div>
+    );
+
+  // ✅ Main layout
   return (
-    <div className="container">
-      <div
-        style={{
-          backgroundColor: '#fff',
-          padding: '2rem',
-          borderRadius: '10px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        }}
-      >
-        <h2>{course.title}</h2>
-        <p>{course.description}</p>
-        <p>
-          <strong>Category:</strong> {course.category}
-        </p>
-        <p>
-          <strong>Difficulty:</strong> {course.difficulty}
-        </p>
-        <p>
-          <strong>Price:</strong> ${course.price}
-        </p>
+    <div className="container py-5">
+      <div className="card shadow-sm border-0 p-4">
+        <div className="card-body">
+          <h2 className="fw-bold mb-3">{course.title}</h2>
+          <p className="text-muted mb-4">{course.description}</p>
 
-        {/* Enrollment Button Logic */}
-        {user ? (
-          isEnrolled() ? (
-            <button
-              disabled
-              style={{
-                backgroundColor: 'green',
-                color: 'white',
-                border: 'none',
-                padding: '0.6rem 1.2rem',
-                borderRadius: '6px',
-                cursor: 'not-allowed',
-              }}
-            >
-              ✅ Already Enrolled
-            </button>
+          <div className="d-flex flex-wrap mb-3">
+            {course.category && (
+              <span className="badge bg-secondary me-2 mb-2">
+                {course.category}
+              </span>
+            )}
+            {course.difficulty && (
+              <span className="badge bg-info text-dark mb-2">
+                {course.difficulty}
+              </span>
+            )}
+          </div>
+
+          <p className="fw-bold fs-5 mb-4">Price: ${course.price}</p>
+
+          {/* Enrollment Button */}
+          {user ? (
+            isEnrolled() ? (
+              <button
+                className="btn btn-success btn-lg w-100 w-md-auto"
+                disabled
+              >
+                ✅ Already Enrolled
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary btn-lg w-100 w-md-auto"
+                onClick={handleEnroll}
+              >
+                Enroll Now
+              </button>
+            )
           ) : (
             <button
-              onClick={handleEnroll}
-              style={{
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                padding: '0.6rem 1.2rem',
-                borderRadius: '6px',
-                cursor: 'pointer',
-              }}
+              className="btn btn-secondary btn-lg w-100 w-md-auto"
+              onClick={() => navigate("/login")}
             >
-              Enroll Now
+              Login to Enroll
             </button>
-          )
-        ) : (
-          <button
-            onClick={() => navigate('/login')}
-            style={{
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              padding: '0.6rem 1.2rem',
-              borderRadius: '6px',
-              cursor: 'pointer',
-            }}
-          >
-            Login to Enroll
-          </button>
-        )}
+          )}
+        </div>
+      </div>
 
-        <h3 style={{ marginTop: '2rem' }}>Lessons</h3>
-        {course.lessons.length === 0 ? (
-          <p>No lessons available yet.</p>
-        ) : (
-          <ul>
+      {/* Lessons Section */}
+      <div className="mt-5">
+        <h4 className="fw-bold mb-3">Lessons</h4>
+        {course.lessons?.length ? (
+          <ul className="list-group list-group-flush">
             {course.lessons.map((lesson) => (
-              <li key={lesson.order}>
-                {lesson.order}. {lesson.title}
+              <li className="list-group-item" key={lesson.order}>
+                <strong>Lesson {lesson.order}:</strong>{" "}
+                {lesson.title || "Untitled"}
               </li>
             ))}
           </ul>
+        ) : (
+          <p className="text-muted">No lessons available yet.</p>
         )}
       </div>
     </div>
