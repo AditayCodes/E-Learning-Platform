@@ -1,47 +1,88 @@
-import { useEffect, useState } from 'react';
-import API from '../api/api';
+import { useEffect, useState } from "react";
+import API from "../api/api";
 
 export default function Dashboard() {
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchEnrollments = async () => {
-      const res = await API.get('/enrollments/me', { headers: { Authorization: `Bearer ${token}` } });
-      setEnrollments(res.data);
-      setLoading(false);
+      try {
+        const res = await API.get("/enrollments/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setEnrollments(res.data);
+      } catch (err) {
+        console.error("Error fetching enrollments:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchEnrollments();
   }, [token]);
 
-  if (loading) return <div className="container py-5">Loading...</div>;
-  if (!enrollments.length) return <div className="container py-5">No enrolled courses yet.</div>;
+  if (loading)
+    return (
+      <div className="container py-5 text-center">
+        <div className="spinner-border text-primary" role="status"></div>
+        <p className="mt-3 text-muted">Loading your courses...</p>
+      </div>
+    );
+
+  if (!enrollments.length)
+    return (
+      <div className="container py-5 text-center">
+        <h4>No enrolled courses yet</h4>
+        <p className="text-muted">
+          Enroll in a course to track your progress.
+        </p>
+      </div>
+    );
 
   return (
     <div className="container py-5">
       <h2 className="mb-4">{user.name}'s Dashboard</h2>
       <div className="row g-4">
-        {enrollments.map(enroll => {
-          const total = enroll.courseId.lessons.length;
-          const completed = Object.values(enroll.progress).filter(Boolean).length;
-          const percent = total ? Math.round((completed / total) * 100) : 0;
+        {enrollments.map((enroll) => {
+          const lessons = enroll.courseId.lessons || [];
+          const totalLessons = lessons.length;
+          const completedLessons = Object.values(enroll.progress || {}).filter(Boolean).length;
+          const percentComplete = totalLessons
+            ? Math.round((completedLessons / totalLessons) * 100)
+            : 0;
 
           return (
             <div className="col-12 col-sm-6 col-md-6 col-lg-4" key={enroll._id}>
-              <div className="card h-100 shadow-sm border-0 bg-white"
-                   style={{transition:"transform 0.3s, box-shadow 0.3s"}}
-                   onMouseEnter={e=>{if(window.innerWidth>768){e.currentTarget.style.transform="translateY(-5px)"; e.currentTarget.style.boxShadow="0 10px 25px rgba(0,0,0,0.15)";}}}
-                   onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="0 4px 10px rgba(0,0,0,0.1)";}}>
-                <div className="card-body d-flex flex-column">
-                  <h5 className="card-title fw-bold">{enroll.courseId.title}</h5>
-                  <p className="card-text flex-grow-1">{enroll.courseId.description}</p>
-                  <p className="mb-2">Progress: {completed}/{total} lessons</p>
-                  <div className="progress mb-2">
-                    <div className="progress-bar progress-bar-striped progress-bar-animated bg-success" style={{width: `${percent}%`}} aria-valuenow={percent} aria-valuemin="0" aria-valuemax="100">{percent}%</div>
+              <div className="card h-100 shadow-sm border-0 bg-white p-3">
+                <h5 className="card-title fw-bold">{enroll.courseId.title}</h5>
+                <p className="card-text text-muted">{enroll.courseId.description}</p>
+
+                <p className="mb-1">
+                  Progress: {completedLessons}/{totalLessons} lessons
+                </p>
+                <div className="progress mb-2">
+                  <div
+                    className="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                    role="progressbar"
+                    style={{ width: `${percentComplete}%` }}
+                    aria-valuenow={percentComplete}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    {percentComplete}%
                   </div>
                 </div>
+
+                <button
+                  className="btn btn-primary w-100 mt-2"
+                  onClick={() =>
+                    window.location.href = `/courses/${enroll.courseId.slug}`
+                  }
+                >
+                  View Course
+                </button>
               </div>
             </div>
           );
