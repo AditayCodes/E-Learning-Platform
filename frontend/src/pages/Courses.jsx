@@ -9,18 +9,17 @@ export default function Courses() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
-  const [theme, setTheme] = useState(document.body.getAttribute("data-bs-theme") || "dark");
+  const [theme, setTheme] = useState(document.body.getAttribute("data-bs-theme") || "light");
 
-  // Theme watcher
+  // Watch theme changes
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      setTheme(document.body.getAttribute("data-bs-theme") || "dark");
+      setTheme(document.body.getAttribute("data-bs-theme") || "light");
     });
     observer.observe(document.body, { attributes: true, attributeFilter: ["data-bs-theme"] });
     return () => observer.disconnect();
   }, []);
 
-  // Fetch courses + enrollments
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,7 +30,7 @@ export default function Courses() {
           const enrollRes = await API.get("/enrollments/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          setEnrollments(enrollRes.data);
+          setEnrollments(enrollRes.data.filter(e => e.courseId !== null));
         }
       } catch (err) {
         console.error("Error loading courses:", err);
@@ -42,7 +41,8 @@ export default function Courses() {
     fetchData();
   }, [token]);
 
-  const isEnrolled = (courseId) => enrollments.some((e) => e.courseId._id === courseId);
+  const isEnrolled = (courseId) =>
+    enrollments.some((e) => e.courseId?._id === courseId);
 
   const handleEnroll = async (courseId) => {
     if (!token) return navigate("/login");
@@ -60,7 +60,8 @@ export default function Courses() {
     }
   };
 
-  if (loading) return <div className="container py-5">Loading courses...</div>;
+  if (loading)
+    return <div className="container py-5 text-center">Loading courses...</div>;
 
   return (
     <div className="container py-5">
@@ -68,10 +69,12 @@ export default function Courses() {
 
       <div className="row g-4">
         {courses.map((course) => (
-          <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={course._id}>
+          <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={course?._id}>
             <div
               className={`card h-100 border-0 shadow-sm ${
-                theme === "dark" ? "bg-dark text-light border-secondary" : "bg-white text-dark"
+                theme === "dark"
+                  ? "bg-dark text-light border-secondary"
+                  : "bg-white text-dark"
               }`}
               style={{
                 transition: "all 0.3s ease",
@@ -79,47 +82,64 @@ export default function Courses() {
               }}
             >
               <div className="card-body d-flex flex-column">
-                <h5 className="card-title fw-bold">{course.title}</h5>
-                <p className="card-text flex-grow-1 text-truncate" style={{ maxHeight: "60px" }}>
-                  {course.description}
+                <h5 className="card-title fw-bold">{course?.title || "Untitled"}</h5>
+                <p
+                  className="card-text flex-grow-1 text-truncate"
+                  style={{ maxHeight: "60px" }}
+                  title={course?.description}
+                >
+                  {course?.description || "No description available"}
                 </p>
 
                 <div className="d-flex flex-wrap mb-2 gap-1">
-                  <span className={`badge ${theme === "dark" ? "bg-secondary text-light" : "bg-secondary"}`}>
-                    {course.category}
+                  <span
+                    className={`badge ${
+                      theme === "dark" ? "bg-secondary text-white" : "bg-secondary"
+                    }`}
+                  >
+                    {course?.category || "General"}
                   </span>
-                  <span className={`badge ${theme === "dark" ? "bg-info text-dark" : "bg-info text-dark"}`}>
-                    {course.difficulty}
+                  <span
+                    className={`badge ${
+                      theme === "dark" ? "bg-info text-dark" : "bg-info text-dark"
+                    }`}
+                  >
+                    {course?.difficulty || "Beginner"}
                   </span>
                 </div>
 
-                <p className="mb-2 fw-semibold">💲 {course.price}</p>
+                <p className="mb-2 fw-semibold">💲 {course?.price || 0}</p>
 
-                {/* Buttons */}
                 <div className="mt-auto d-flex flex-column gap-2">
                   <button
-                    className={`btn w-100 ${theme === "dark" ? "btn-outline-primary" : "btn-primary"}`}
-                    onClick={() => navigate(`/courses/${course.slug}`)}
+                    className={`btn w-100 ${
+                      theme === "dark" ? "btn-outline-light" : "btn-primary"
+                    }`}
+                    onClick={() => navigate(`/courses/${course?.slug || ""}`)}
                   >
                     View Details
                   </button>
 
                   {user ? (
-                    isEnrolled(course._id) ? (
+                    isEnrolled(course?._id) ? (
                       <button className="btn btn-success w-100" disabled>
                         ✅ Already Enrolled
                       </button>
                     ) : (
                       <button
-                        className={`btn w-100 ${theme === "dark" ? "btn-primary" : "btn-primary"}`}
-                        onClick={() => handleEnroll(course._id)}
+                        className={`btn w-100 ${
+                          theme === "dark" ? "btn-primary" : "btn-primary"
+                        }`}
+                        onClick={() => handleEnroll(course?._id)}
                       >
                         Enroll Now
                       </button>
                     )
                   ) : (
                     <button
-                      className={`btn w-100 ${theme === "dark" ? "btn-secondary" : "btn-secondary"}`}
+                      className={`btn w-100 ${
+                        theme === "dark" ? "btn-secondary" : "btn-secondary"
+                      }`}
                       onClick={() => navigate("/login")}
                     >
                       Login to Enroll

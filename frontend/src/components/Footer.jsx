@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
 
 export default function Footer() {
+  // Initialize theme from body or default to light
   const [theme, setTheme] = useState(
-    document.body.getAttribute("data-bs-theme") || "dark"
+    document.body.getAttribute("data-bs-theme") || "light"
   );
 
+  // Watch for theme changes dynamically
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      setTheme(document.body.getAttribute("data-bs-theme") || "dark");
+      const current = document.body.getAttribute("data-bs-theme") || "light";
+      setTheme(current);
     });
-    observer.observe(document.body, { attributes: true, attributeFilter: ["data-bs-theme"] });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["data-bs-theme"],
+    });
     return () => observer.disconnect();
   }, []);
 
@@ -18,7 +24,7 @@ export default function Footer() {
   // Classes for dark/light mode
   const bgClass = theme === "dark" ? "bg-dark" : "bg-light";
   const textClass = theme === "dark" ? "text-white" : "text-dark";
-  const secondaryText = theme === "dark" ? "text-light" : "text-muted"; // brighter for dark mode
+  const secondaryText = theme === "dark" ? "text-light" : "text-muted";
 
   return (
     <footer
@@ -67,7 +73,7 @@ export default function Footer() {
           </a>
         </div>
 
-        {/* ✅ Fixed last line visibility */}
+        {/* Last line */}
         <p className={`mt-3 small mb-0 ${secondaryText}`}>
           Built with ❤️ by{" "}
           <a
@@ -78,7 +84,6 @@ export default function Footer() {
           >
             Aditay Sharma
           </a>{" "}
-          using React, Node.js & Bootstrap
         </p>
       </div>
     </footer>
