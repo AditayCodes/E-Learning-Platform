@@ -11,7 +11,7 @@ export default function Courses() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [theme, setTheme] = useState(document.body.getAttribute("data-bs-theme") || "dark");
 
-  // ✅ Watch theme changes (for dark/light mode)
+  // Theme watcher
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setTheme(document.body.getAttribute("data-bs-theme") || "dark");
@@ -20,12 +20,13 @@ export default function Courses() {
     return () => observer.disconnect();
   }, []);
 
-  // ✅ Fetch Courses + Enrollments
+  // Fetch courses + enrollments
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await API.get("/courses");
         setCourses(res.data);
+
         if (token) {
           const enrollRes = await API.get("/enrollments/me", {
             headers: { Authorization: `Bearer ${token}` },
@@ -70,7 +71,7 @@ export default function Courses() {
           <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={course._id}>
             <div
               className={`card h-100 border-0 shadow-sm ${
-                theme === "dark" ? "bg-dark text-light" : "bg-white text-dark"
+                theme === "dark" ? "bg-dark text-light border-secondary" : "bg-white text-dark"
               }`}
               style={{
                 transition: "all 0.3s ease",
@@ -83,17 +84,21 @@ export default function Courses() {
                   {course.description}
                 </p>
 
-                <div className="d-flex flex-wrap mb-2">
-                  <span className="badge bg-secondary me-1 mb-1">{course.category}</span>
-                  <span className="badge bg-info text-dark mb-1">{course.difficulty}</span>
+                <div className="d-flex flex-wrap mb-2 gap-1">
+                  <span className={`badge ${theme === "dark" ? "bg-secondary text-light" : "bg-secondary"}`}>
+                    {course.category}
+                  </span>
+                  <span className={`badge ${theme === "dark" ? "bg-info text-dark" : "bg-info text-dark"}`}>
+                    {course.difficulty}
+                  </span>
                 </div>
 
                 <p className="mb-2 fw-semibold">💲 {course.price}</p>
 
-                {/* ✅ Buttons Section */}
+                {/* Buttons */}
                 <div className="mt-auto d-flex flex-column gap-2">
                   <button
-                    className="btn btn-outline-primary w-100"
+                    className={`btn w-100 ${theme === "dark" ? "btn-outline-primary" : "btn-primary"}`}
                     onClick={() => navigate(`/courses/${course.slug}`)}
                   >
                     View Details
@@ -106,7 +111,7 @@ export default function Courses() {
                       </button>
                     ) : (
                       <button
-                        className="btn btn-primary w-100"
+                        className={`btn w-100 ${theme === "dark" ? "btn-primary" : "btn-primary"}`}
                         onClick={() => handleEnroll(course._id)}
                       >
                         Enroll Now
@@ -114,7 +119,7 @@ export default function Courses() {
                     )
                   ) : (
                     <button
-                      className="btn btn-secondary w-100"
+                      className={`btn w-100 ${theme === "dark" ? "btn-secondary" : "btn-secondary"}`}
                       onClick={() => navigate("/login")}
                     >
                       Login to Enroll

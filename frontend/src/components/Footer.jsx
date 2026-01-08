@@ -6,10 +6,8 @@ export default function Footer() {
   );
 
   useEffect(() => {
-    // Watch for changes to the body attribute
     const observer = new MutationObserver(() => {
-      const newTheme = document.body.getAttribute("data-bs-theme") || "dark";
-      setTheme(newTheme);
+      setTheme(document.body.getAttribute("data-bs-theme") || "dark");
     });
     observer.observe(document.body, { attributes: true, attributeFilter: ["data-bs-theme"] });
     return () => observer.disconnect();
@@ -17,57 +15,70 @@ export default function Footer() {
 
   const currentYear = new Date().getFullYear();
 
+  // Classes for dark/light mode
+  const bgClass = theme === "dark" ? "bg-dark" : "bg-light";
+  const textClass = theme === "dark" ? "text-white" : "text-dark";
+  const secondaryText = theme === "dark" ? "text-light" : "text-muted"; // brighter for dark mode
+
   return (
     <footer
-      className={`text-center py-4 mt-auto ${
-        theme === "dark" ? "bg-dark text-light" : "bg-light text-dark"
-      }`}
+      className={`text-center py-4 mt-auto ${bgClass} ${textClass}`}
       style={{
         width: "100%",
         bottom: 0,
         borderTop:
           theme === "dark"
-            ? "1px solid rgba(255,255,255,0.1)"
+            ? "1px solid rgba(255,255,255,0.2)"
             : "1px solid rgba(0,0,0,0.1)",
         transition: "background-color 0.4s ease, color 0.4s ease",
       }}
     >
       <div className="container">
-        <p className="mb-2 fw-semibold">
+        <p className={`mb-2 fw-semibold ${textClass}`}>
           © {currentYear} E-Learning Platform. All rights reserved.
         </p>
 
-        <div className="d-flex justify-content-center gap-3">
+        {/* Social Icons */}
+        <div className="d-flex justify-content-center gap-3 mb-2">
           <a
-            href="https://www.linkedin.com/"
+            href="https://www.linkedin.com/in/aditay-sharma/"
             target="_blank"
             rel="noopener noreferrer"
-            className={theme === "dark" ? "text-light" : "text-dark"}
+            className={textClass}
+            title="LinkedIn"
           >
             <i className="bi bi-linkedin fs-5"></i>
           </a>
           <a
-            href="https://github.com/"
+            href="https://github.com/AditayCodes"
             target="_blank"
             rel="noopener noreferrer"
-            className={theme === "dark" ? "text-light" : "text-dark"}
+            className={textClass}
+            title="GitHub"
           >
             <i className="bi bi-github fs-5"></i>
           </a>
           <a
             href="mailto:support@elearning.com"
-            className={theme === "dark" ? "text-light" : "text-dark"}
+            className={textClass}
+            title="Email Support"
           >
             <i className="bi bi-envelope-fill fs-5"></i>
           </a>
         </div>
 
-        <p
-          className={`mt-3 small mb-0 ${
-            theme === "dark" ? "text-secondary" : "text-muted"
-          }`}
-        >
-          Built with ❤️ using React, Node.js & Bootstrap
+        {/* ✅ Fixed last line visibility */}
+        <p className={`mt-3 small mb-0 ${secondaryText}`}>
+          Built with ❤️ by{" "}
+          <a
+            href="https://www.linkedin.com/in/aditay-sharma/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${textClass} text-decoration-underline`}
+          >
+            Aditay Sharma
+          </a>{" "}
+          using React, Node.js & Bootstrap
         </p>
       </div>
     </footer>
