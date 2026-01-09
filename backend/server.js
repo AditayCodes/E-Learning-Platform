@@ -12,18 +12,32 @@ import enrollmentRoutes from "./routes/enrollments.js";
 // ✅ Load environment variables
 dotenv.config();
 
-// ✅ Initialize Express app
+// ✅ Initialize Express
 const app = express();
 
-// ✅ Middleware
+// ✅ Security & Performance Middlewares
+app.use(helmet());
+app.use(compression());
 app.use(express.json());
-app.use(helmet()); // security headers
-app.use(compression()); // gzip compression
 
-// ✅ CORS (allow frontend)
+// ✅ CORS Configuration
+const allowedOrigins = [
+  "https://e-learning-platform-ebon-seven.vercel.app", // your deployed frontend
+  "http://localhost:5173", // your local frontend for dev
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like curl, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
@@ -35,20 +49,18 @@ app.use("/api/enrollments", enrollmentRoutes);
 
 // ✅ Test Route
 app.get("/", (req, res) => {
-  res.send("Backend is running ✅");
+  res.send("✅ E-Learning Backend is running successfully!");
 });
 
-// ✅ Connect to MongoDB and start server
+// ✅ Connect to MongoDB and Start Server
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB connected successfully");
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () =>
-      console.log(`🚀 Server running on port ${PORT}`)
-    );
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
+    console.error("❌ MongoDB connection error:", err);
     process.exit(1);
   });
