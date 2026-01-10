@@ -27,6 +27,19 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// ✅ Get course by slug
+router.get("/slug/:slug", async (req, res) => {
+  try {
+    const course = await Course.findOne({ slug: req.params.slug });
+    if (!course) return res.status(404).json({ message: "Course not found" });
+    res.json(course);
+  } catch (err) {
+    console.error("Error fetching course by slug:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 // POST /api/courses → create course (admin only)
 router.post('/', protect, admin, async (req, res) => {
     try {
